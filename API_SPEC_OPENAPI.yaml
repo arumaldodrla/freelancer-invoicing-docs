@@ -1,11 +1,13 @@
 openapi: 3.1.0
 info:
-  title: Freelancer Invoicing & Gig Income Tracking API
-  version: 1.0.0
+  title: Gig/Freelance Income Reset API
+  version: 1.1.0
+  description: API for the Gig/Freelance Income Reset application, designed to support a product-led growth model.
 paths:
-  /users:
+  /auth/signup:
     post:
-      summary: Create a new user
+      summary: User Signup & Trial Activation
+      description: Creates a new user and activates a 15-day free trial.
       requestBody:
         required: true
         content:
@@ -15,14 +17,17 @@ paths:
               properties:
                 email:
                   type: string
+                  format: email
                 password:
                   type: string
+                  format: password
       responses:
         '201':
-          description: User created successfully
+          description: User created and trial activated.
   /subscriptions:
     post:
-      summary: Create a new subscription
+      summary: Upgrade Subscription
+      description: Upgrades a user's subscription to a paid plan.
       requestBody:
         required: true
         content:
@@ -32,12 +37,22 @@ paths:
               properties:
                 plan:
                   type: string
+                  enum: [STARTER, PRO, PREMIUM]
+                payment_token:
+                  type: string
       responses:
-        '201':
-          description: Subscription created successfully
-  /tickets:
+        '200':
+          description: Subscription upgraded successfully.
+  /income-sources:
+    get:
+      summary: List Income Sources
+      description: Retrieves a list of the user's connected income sources.
+      responses:
+        '200':
+          description: A list of income sources.
     post:
-      summary: Create a new support ticket
+      summary: Connect Income Source
+      description: Connects a new income source to the user's account.
       requestBody:
         required: true
         content:
@@ -45,10 +60,45 @@ paths:
             schema:
               type: object
               properties:
-                subject:
+                platform:
                   type: string
-                description:
+                credentials:
+                  type: object
+      responses:
+        '201':
+          description: Income source connected successfully.
+  /expenses/scan:
+    post:
+      summary: Scan a Receipt (OCR)
+      description: Scans a receipt image to create an expense entry.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                receipt:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: Expense created from scanned receipt.
+  /support/tickets:
+    post:
+      summary: Create Support Ticket
+      description: Creates a new support ticket in Zoho Desk when the AI assistant escalates.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                conversation_history:
                   type: string
       responses:
         '201':
-          description: Ticket created successfully
+          description: Support ticket created successfully.

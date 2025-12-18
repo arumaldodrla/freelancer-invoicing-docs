@@ -1,59 +1,50 @@
-# SOP: AI Development Workflow for Google Antigravity
+_# SOP: AI Development Workflow for Google Antigravity
 
-## 1. Repository Conventions
+**Version:** 1.1
 
-- **Monorepo:** The project will be managed in a single repository.
-- **Directory Structure:**
-    - `/app`: Frontend React application (Refine + Tailwind + Metronic)
-    - `/supabase`: Backend Supabase project (migrations, functions, etc.)
-    - `/docs`: All project documentation (this document set)
+This document outlines the standard operating procedure for the Google Antigravity AI development team. Our workflow is designed for maximum velocity, enabling our lean 3-person team to achieve the productivity of a much larger one and deliver the MVP within the aggressive 12-week timeline.
 
-## 2. Branching & Pull Request (PR) Process
+## 1. Guiding Principle: Velocity & Business Focus
 
-- **Branching Strategy:**
-    - `main`: Production branch. All code on this branch must be deployable.
-    - `develop`: Integration branch. All feature branches are merged into this branch.
-    - `feature/<feature-name>`: Feature branches. Each new feature should be developed in its own branch.
-- **Pull Request (PR) Process:**
-    - All PRs must be reviewed and approved by at least one human engineer.
-    - PRs must include a clear description of the changes and a link to the relevant user story or task.
-    - All PRs must pass all automated tests before they can be merged.
+Every aspect of our workflow is optimized for speed and alignment with business goals. As AI agents, we are expected to:
+- **Understand the "Why":** Before writing any code, review the relevant sections of the `PRD.md` and `IMPLEMENTATION_BACKLOG.md` to understand the business context and the user problem you are solving.
+- **Embrace Automation:** Automate everything that can be automated, from testing to deployment. Manual processes are the enemy of velocity.
+- **Communicate Proactively:** Provide clear, concise updates on progress and any blockers. Use the `#dev-log` Slack channel for daily stand-up style updates.
 
-## 3. AI Agent Roles
+## 2. The Development Cycle
 
-- **Architect:** Responsible for the overall system design and architecture.
-- **Backend Developer:** Responsible for implementing the Supabase backend, including the database schema, API functions, and integrations.
-- **Frontend Developer:** Responsible for implementing the React frontend, including the UI, components, and state management.
-- **QA Engineer:** Responsible for testing the application, including writing and executing automated tests.
-- **Security Engineer:** Responsible for ensuring the application is secure and compliant with all relevant regulations.
-- **DevOps Engineer:** Responsible for the CI/CD pipeline, deployment, and infrastructure.
+1.  **Pick a Task:** Assign yourself a task from the current phase of the `IMPLEMENTATION_BACKLOG.md`.
+2.  **Create a Feature Branch:** Create a new branch from `develop` with the naming convention `feature/<ticket-id>-<short-description>` (e.g., `feature/GIR-12-billing-upgrade-page`).
+3.  **Develop & Test:**
+    - Write the code to implement the feature.
+    - Write corresponding unit and integration tests. Our goal is a minimum of 80% test coverage.
+    - Run all tests locally to ensure nothing has broken.
+4.  **Create a Pull Request (PR):**
+    - Push your feature branch to GitHub.
+    - Create a PR against the `develop` branch.
+    - The PR description must include a summary of the changes and a link to the backlog ticket.
+5.  **Code Review:**
+    - Another AI agent or a human engineer will review the PR.
+    - The review will focus on correctness, adherence to the architecture, and test coverage.
+6.  **Merge & Deploy:**
+    - Once the PR is approved and all automated checks have passed, it will be merged into `develop`.
+    - The merge will automatically trigger a deployment to the `dev` environment.
 
-## 4. Definition of Done
+## 3. Definition of Done
 
-A feature is considered "done" when:
+A task is considered **"Done"** when:
 
-- The code has been reviewed and approved.
-- All automated tests have passed.
-- The feature has been tested and verified by a QA engineer.
-- The documentation has been updated.
-- The feature has been deployed to the staging environment.
+- The code is merged into the `develop` branch.
+- All automated tests (unit, integration) are passing.
+- The feature is successfully deployed and verified in the `dev` environment.
+- Any necessary updates to the documentation (`ARCHITECTURE.md`, `API_SPEC_OPENAPI.yaml`, etc.) have been included in the PR.
 
-## 5. Human Approval Gates
+## 4. Human Approval Gates: The Safety Net
 
-- **Code Merges to `main`:** All PRs to the `main` branch must be reviewed and approved by a human engineer.
-- **Production Deployments:** Deployments to the production environment require manual approval.
-- **Schema Migrations:** Any changes to the database schema in the production environment must be manually approved.
-- **Security and Compliance Changes:** Any modifications to security policies, access controls, or compliance-related logic must be reviewed and approved by a human.
+While we prioritize velocity, certain critical actions require human oversight. These gates are designed to prevent catastrophic errors and ensure alignment with business and security requirements.
 
-## 6. Release Checklist (Staging to Prod)
+- **Production Deployments:** Merging a `release` branch into `main` requires a manual approval step in GitHub Actions from the designated Lead Engineer.
+- **Destructive Database Migrations:** Any migration that could result in data loss requires a manual review and approval.
+- **Changes to Security or Billing Logic:** Any code that modifies authentication, authorization, or the core billing integration with Zoho **must** be reviewed and explicitly signed off on by a human engineer.
 
-1.  [ ] All automated tests have passed.
-2.  [ ] The release has been tested and verified by a QA engineer in the staging environment.
-3.  [ ] The documentation has been updated.
-4.  [ ] The release has been approved by a human engineer.
-5.  [ ] The release has been deployed to the production environment.
-6.  [ ] The production environment has been monitored for any issues after the release.
-
-## 7. Incident Response Workflow Handoff
-
-In the event of a production incident, the on-call engineer will be notified immediately. The incident response workflow is documented in `OBSERVABILITY_INCIDENTS.md`.
+This workflow allows us to move at the speed required by our business plan while maintaining the stability and security our users expect.

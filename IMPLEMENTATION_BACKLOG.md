@@ -1,47 +1,34 @@
-# Implementation Backlog
+_# Implementation Backlog
 
-This document outlines the prioritized backlog of epics, stories, and tasks for the implementation of the Freelancer Invoicing & Gig Income Tracking application.
+**Version:** 1.1
 
-## Epics
+This document outlines the prioritized implementation backlog, structured as a 12-week plan to deliver the Minimum Viable Product (MVP). The backlog is organized into three phases, aligning with our strategic goal of rapid market entry.
 
-- **Epic 1: Core Platform & Onboarding**
-- **Epic 2: Income & Expense Management**
-- **Epic 3: Tax Estimation & Reporting**
-- **Epic 4: Billing & Subscription Management**
-- **Epic 5: AI-Powered Features**
+## Phase 1: The Core Revenue Path (Weeks 1-4)
 
-## Stories & Tasks
+**Goal:** Launch the core infrastructure and the complete, end-to-end user journey from trial signup to paid conversion. This phase is laser-focused on enabling revenue from day one.
 
-### Epic 1: Core Platform & Onboarding
+| Epic | User Story | Key Tasks |
+| :--- | :--- | :--- |
+| **Core Platform & Onboarding** | As a new user, I want to sign up for a 15-day free trial and connect my primary income source. | - Implement user signup/login with Supabase Auth.<br>- Create a new Contact in Zoho CRM on signup.<br>- Create a 15-day trial subscription in Zoho Billing.<br>- Build the onboarding wizard to guide users through connecting their first income source. |
+| **Billing & Subscriptions** | As a trial user, I want to upgrade to a paid plan by entering my credit card details. | - Build the pricing and upgrade page within the app.<br>- Integrate the Authorize.net hosted payment form (via Zoho Billing) to securely collect payment details.<br>- Implement the backend logic to upgrade the subscription in Zoho Billing and update the user's tag in Zoho CRM. |
 
-- **Story: As a new user, I want to be able to sign up for a free trial.**
-    - Task: Implement the user signup form.
-    - Task: Integrate with Supabase Auth for user authentication.
-    - Task: Create a new user profile in the database.
-    - Task: Create a new contact in Zoho CRM.
-    - Task: Create a new trial subscription in Zoho Billing.
-- **Story: As a new user, I want to be guided through a simple onboarding process.**
-    - Task: Design and implement the onboarding wizard.
-    - Task: Implement the income source connection flow.
-    - Task: Implement the initial expense entry flow.
+## Phase 2: The "Aha!" Moment - Delivering Core Value (Weeks 5-8)
 
-### Epic 4: Billing & Subscription Management
+**Goal:** Deliver the core features that solve the user's most pressing pain points: income visibility and tax uncertainty. This phase is about delivering the "aha!" moment that drives trial-to-paid conversion.
 
-- **Story: As a user, I want to be able to upgrade my subscription plan.**
-    - Task: Design and implement the subscription upgrade screen.
-    - Task: Integrate with Authorize.net for payment processing.
-    - Task: Update the subscription status in Zoho Billing.
-- **Story: As a user, I want to be able to cancel my subscription.**
-    - Task: Design and implement the subscription cancellation screen.
-    - Task: Update the subscription status in Zoho Billing.
+| Epic | User Story | Key Tasks |
+| :--- | :--- | :--- |
+| **Income & Expense Management** | As an active user, I want to see all my income from connected sources in one dashboard. | - Build the backend sync service to pull transactions from connected gig platforms.<br>- Design and build the main user dashboard to visualize income streams.<br>- Implement manual expense entry. |
+| **Tax Estimation** | As an active user, I want to see a real-time estimate of my self-employment tax liability. | - Integrate a tax calculation library.<br>- Build the backend logic to calculate estimated taxes based on income and expenses.<br>- Display the tax estimate clearly on the user's dashboard, with appropriate disclaimers. |
+| **AI-Powered OCR** | As an active user, I want to scan a receipt with my phone and have the expense automatically created. | - Integrate with the Gemini Vision API for OCR.<br>- Build the receipt scanning UI in the mobile-responsive web app.<br>- Implement the confirmation flow where the user verifies the scanned data. |
 
-### Epic 5: AI-Powered Features
+## Phase 3: Building Trust & Stickiness (Weeks 9-12)
 
-- **Story: As a user, I want to be able to scan my receipts to automatically extract the details.**
-    - Task: Integrate with Gemini Vision for receipt OCR.
-    - Task: Implement the receipt scanning UI.
-    - Task: Implement the receipt confirmation flow.
-- **Story: As a user, I want to be able to get help from an AI assistant.**
-    - Task: Integrate with an LLM provider (Gemini/Claude/OpenAI).
-    - Task: Implement the AI assistant chat interface.
-    - Task: Implement the escalation flow to create a Zoho Desk ticket.
+**Goal:** Round out the MVP with features that build trust, improve the user experience, and lay the groundwork for long-term retention.
+
+| Epic | User Story | Key Tasks |
+| :--- | :--- | :--- |
+| **AI-First Support** | As a user with a question, I want to get an instant answer from an AI assistant. | - Integrate with an LLM for the in-app chat support.<br>- Build the AI assistant chat interface.<br>- Implement the escalation path to create a Zoho Desk ticket if the AI cannot resolve the issue. |
+| **Reporting & Insights** | As a user, I want to generate a professional income verification letter. | - Build the backend service to generate a PDF income letter based on the user's data.<br>- Implement the UI for the user to download their letter. |
+| **Operational Readiness** | As a developer, I want to have confidence in the stability of the platform. | - Implement the automated weekly health check (`Sunday Checkup`).<br>- Set up dashboards and alerting for key business and application metrics.<br>- Conduct a final round of E2E and security testing before the public launch. |

@@ -1,0 +1,54 @@
+openapi: 3.1.0
+info:
+  title: Freelancer Invoicing & Gig Income Tracking API
+  version: 1.0.0
+paths:
+  /users:
+    post:
+      summary: Create a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '201':
+          description: User created successfully
+  /subscriptions:
+    post:
+      summary: Create a new subscription
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                plan:
+                  type: string
+      responses:
+        '201':
+          description: Subscription created successfully
+  /tickets:
+    post:
+      summary: Create a new support ticket
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                subject:
+                  type: string
+                description:
+                  type: string
+      responses:
+        '201':
+          description: Ticket created successfully

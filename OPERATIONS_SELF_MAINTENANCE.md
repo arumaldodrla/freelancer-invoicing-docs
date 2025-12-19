@@ -1,46 +1,41 @@
 # Operations & Self-Maintenance
 
-**Version:** 1.1
+**Version:** 3.0
 
-This document outlines the operational philosophy and automated self-maintenance procedures for the Gig/Freelance Income Reset application. Our core business strategy relies on a lean team and low operational overhead, making automation a critical component of our success.
+This document outlines the automated operational procedures for the Freelancer Financial Hub. The system is designed to be self-monitoring and self-healing, allowing the team to focus on product development rather than operational firefighting.
 
-## 1. Operational Philosophy: AI-First, Human as Exception
+## 1. The Automated Weekly Health Check ("Sunday Checkup")
 
-Our operational model is built on the same principle as our customer support model: **AI-first, with human intervention as the exception.** The system is designed to be largely self-healing and self-monitoring, allowing our lean 3-person engineering team to focus on building value, not fighting fires. This is how we maintain our exceptional LTV:CAC ratio and achieve profitability with minimal capital.
-
-## 2. The Automated Weekly Health Check ("Sunday Checkup")
-
-Every Sunday at 02:00 UTC, a Supabase scheduled function (`weekly-health-check`) will execute a comprehensive series of checks. This automated process is our first line of defense against issues that could impact revenue, user trust, or business performance.
+Every Sunday at 02:00 UTC, a Supabase scheduled function (`weekly-health-check`) will execute a series of checks focused on the core value propositions of the product.
 
 | Check Category | Specific Checks | Business Impact & Rationale |
 | :--- | :--- | :--- |
-| **Infrastructure & Revenue Path** | - Ping critical API endpoints: Zoho Billing, Authorize.net, AI services.<br>- Simulate a trial signup and an upgrade API call in a sandboxed test account. | **Prevents Revenue Loss.** Ensures our core monetization path is always open. A failure here is a P1 incident. |
-| **Data Integrity & Consistency** | - Check for orphaned records (e.g., `subscriptions` without a valid `user`).<br>- Validate that all `users` have a corresponding `zoho_crm_contact_id`.<br>- Check for data mismatches between our DB and Zoho Billing. | **Prevents Billing Errors & Protects User Trust.** Ensures that what the user sees in the app matches their actual subscription, preventing customer support nightmares. |
-| **Business KPI Monitoring** | - Compare key metrics (trial conversion rate, churn rate) against the financial model's targets.<br>- Monitor the growth rate of key tables (`users`, `transactions`). | **Provides an Early Warning System.** Allows us to detect deviations from our business plan early, before they become major problems. |
-| **Security & Anomaly Detection** | - Scan for spikes in failed login attempts.<br>- Monitor for unusual API usage patterns (e.g., a single user syncing data excessively).<br>- Check for users with `gdpr_erasure_requested` flags that have not been processed. | **Proactive Threat Detection.** Helps us identify and respond to potential security threats before they escalate. |
+| **Income Sync Integrity** | - Ping all supported gig platform APIs (Upwork, Fiverr, etc.) to ensure they are reachable.<br>- Check for users whose `income_sources` have not synced in over 24 hours.<br>- Validate a sample of recent transactions against known good data. | **Protects Core Value.** The entire product is built on accurate income aggregation. A failure here means the product is not delivering on its primary promise. |
+| **Tax Calculation Accuracy** | - Run the tax calculation engine on a set of predefined user profiles with known income/expense data.<br>- Compare the output against a set of expected, manually calculated tax liabilities. | **Builds User Trust.** An incorrect tax calculation can have serious financial consequences for the user and would destroy the credibility of the product. |
+| **Data Integrity** | - Check for orphaned records (e.g., `transactions` without a valid `user_id`).<br>- Ensure that all `expenses` have a valid category. | **Prevents Data Corruption.** Maintains the health and accuracy of the user's financial data, which is the core asset of the application. |
+| **Revenue Path** | - Ping Zoho Billing and Authorize.net APIs.<br>- Simulate a trial signup and an upgrade API call in a sandboxed test account. | **Prevents Revenue Loss.** Ensures our own business's monetization path is always open. |
 
-## 3. Automated Actions & Escalation Logic
+## 2. Automated Actions & Escalation Logic
 
-The system is empowered to take specific, safe, and idempotent actions automatically. Anything outside this scope requires human approval.
+The system is empowered to take specific, safe actions automatically.
 
 ### Allowed Automated Actions
 
-- **Retry Failed Jobs:** Automatically retry failed income syncs or webhook processing with an exponential backoff strategy.
-- **Isolate Failing Integrations:** If a user's income source connection fails repeatedly, automatically mark the source as `NEEDS_REAUTH` and trigger a notification to the user.
-- **Data Cleanup:** Automatically prune expired, non-converted trial accounts and associated data after a grace period.
+- **Retry Failed Syncs:** Automatically retry failed income sync jobs with an exponential backoff strategy.
+- **Isolate Failing Integrations:** If a user's connection to a specific gig platform fails repeatedly, automatically mark the `income_source` as `NEEDS_REAUTH` and trigger a notification to the user.
+- **Data Pruning:** Automatically prune old, inactive trial accounts that do not convert to paid subscriptions.
 
 ### Forbidden Automated Actions (Require Human Intervention)
 
-- **Modifying Financial Records:** The system will **never** automatically alter records in Zoho Books or issue refunds.
-- **Altering Subscription Data:** The system will **never** change a user's subscription plan or pricing without a direct, user-initiated action.
-- **Running Un-audited Code:** The system will **never** deploy new code or run database migrations automatically.
+- **Modifying Financial Data:** The system will **never** automatically alter a user's `transactions` or `expenses` records after they have been created.
+- **Altering Tax Calculations:** The core tax calculation formulas can only be changed via a new code deployment that has been reviewed and approved.
 
-## 4. Automated Reporting & Alerting
+## 3. Automated Reporting & Alerting
 
 The weekly checkup has a clear, tiered reporting structure:
 
 | Status | Anomaly Level | Action |
 | :--- | :--- | :--- |
 | **Green** | No issues found. | A single "All Systems Green" message is posted to the internal `#ops-status` Slack channel. |
-| **Yellow** | Minor, non-critical issue (e.g., KPI deviation, single API timeout). | A detailed report is emailed to the `engineering@` distribution list for review during business hours. |
-| **Red** | Critical P1/P2 issue (e.g., revenue path failure, major data inconsistency). | 1.  An alert is sent to PagerDuty to notify the on-call engineer.<br>2.  A high-priority ticket is automatically created in Zoho Desk and assigned to the "Engineering" team.<br>3.  A critical alert message is posted in the `#ops-status` Slack channel. |
+| **Yellow** | Minor, non-critical issue (e.g., a single platform API was slow to respond). | A detailed report is emailed to the `engineering@` distribution list for review. |
+| **Red** | Critical P1/P2 issue (e.g., tax calculations are incorrect, income sync is failing for all users). | 1. An alert is sent to PagerDuty to notify the on-call engineer.<br>2. A high-priority ticket is automatically created in Zoho Desk.<br>3. A critical alert message is posted in the `#ops-status` Slack channel. |

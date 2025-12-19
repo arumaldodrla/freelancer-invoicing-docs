@@ -1,34 +1,34 @@
-_# Implementation Backlog
+# Implementation Backlog
 
-**Version:** 1.1
+**Version:** 3.0
 
-This document outlines the prioritized implementation backlog, structured as a 12-week plan to deliver the Minimum Viable Product (MVP). The backlog is organized into three phases, aligning with our strategic goal of rapid market entry.
+This document outlines the prioritized implementation backlog for the Freelancer Financial Hub, structured as a 12-week plan to deliver the Minimum Viable Product (MVP). The backlog is organized by the pain points it solves, ensuring a laser focus on delivering value to the user.
 
-## Phase 1: The Core Revenue Path (Weeks 1-4)
+## Phase 1: The Foundation - Income & Tax Clarity (Weeks 1-5)
 
-**Goal:** Launch the core infrastructure and the complete, end-to-end user journey from trial signup to paid conversion. This phase is laser-focused on enabling revenue from day one.
+**Goal:** Solve the two most severe pain points: not knowing one's true income and not knowing how much tax is owed. This phase delivers the core "magic moment" of the product.
 
-| Epic | User Story | Key Tasks |
+| Epic (Pain Point) | User Story | Key Tasks |
 | :--- | :--- | :--- |
-| **Core Platform & Onboarding** | As a new user, I want to sign up for a 15-day free trial and connect my primary income source. | - Implement user signup/login with Supabase Auth.<br>- Create a new Contact in Zoho CRM on signup.<br>- Create a 15-day trial subscription in Zoho Billing.<br>- Build the onboarding wizard to guide users through connecting their first income source. |
-| **Billing & Subscriptions** | As a trial user, I want to upgrade to a paid plan by entering my credit card details. | - Build the pricing and upgrade page within the app.<br>- Integrate the Authorize.net hosted payment form (via Zoho Billing) to securely collect payment details.<br>- Implement the backend logic to upgrade the subscription in Zoho Billing and update the user's tag in Zoho CRM. |
+| **Income Visibility** | As a new user, I want to connect my Upwork account and see my YTD income in one place. | - Build the user signup/login flow with Supabase Auth.<br>- Create the `income_sources` and `transactions` tables.<br>- Build the API client and sync logic for the first gig platform (e.g., Upwork).<br>- Design and build the main dashboard UI with a prominent YTD income display. |
+| **Tax Uncertainty** | As an active user, I want to see a real-time estimate of my quarterly tax liability based on my income. | - Build the initial Tax Calculation Engine based on the standard self-employment tax formula.<br>- Create the `tax_estimates` table.<br>- Integrate the engine with the backend so that taxes are recalculated after every income sync.<br>- Display the current quarterly tax estimate on the dashboard. |
 
-## Phase 2: The "Aha!" Moment - Delivering Core Value (Weeks 5-8)
+## Phase 2: Building Trust & Utility (Weeks 6-9)
 
-**Goal:** Deliver the core features that solve the user's most pressing pain points: income visibility and tax uncertainty. This phase is about delivering the "aha!" moment that drives trial-to-paid conversion.
+**Goal:** Build on the foundation by solving the next two major pain points: tracking expenses to lower the tax bill and proving income to unlock financial products.
 
-| Epic | User Story | Key Tasks |
+| Epic (Pain Point) | User Story | Key Tasks |
 | :--- | :--- | :--- |
-| **Income & Expense Management** | As an active user, I want to see all my income from connected sources in one dashboard. | - Build the backend sync service to pull transactions from connected gig platforms.<br>- Design and build the main user dashboard to visualize income streams.<br>- Implement manual expense entry. |
-| **Tax Estimation** | As an active user, I want to see a real-time estimate of my self-employment tax liability. | - Integrate a tax calculation library.<br>- Build the backend logic to calculate estimated taxes based on income and expenses.<br>- Display the tax estimate clearly on the user's dashboard, with appropriate disclaimers. |
-| **AI-Powered OCR** | As an active user, I want to scan a receipt with my phone and have the expense automatically created. | - Integrate with the Gemini Vision API for OCR.<br>- Build the receipt scanning UI in the mobile-responsive web app.<br>- Implement the confirmation flow where the user verifies the scanned data. |
+| **Losing Deductions** | As a user, I want to manually enter my business expenses to lower my taxable income. | - Create the `expenses` table.<br>- Build the expense entry form and a list view of all expenses.<br>- Integrate expense data into the Tax Calculation Engine.<br>- Add an expense breakdown visualization to the dashboard. |
+| **Losing Deductions (AI)** | As a user, I want to scan a receipt with my phone to automatically create an expense. | - Integrate with Gemini Vision for OCR.<br>- Build the mobile-friendly receipt upload UI.<br>- Create the backend logic to handle the image upload and pre-fill the expense form with the OCR data. |
+| **Proving Income** | As a user, I want to download a professional PDF letter that summarizes my income for the last 12 months. | - Build the PDF generation service/function.<br>- Create the backend endpoint that aggregates user income data and calls the PDF service.<br>- Add a "Download Income Letter" button to the dashboard. |
 
-## Phase 3: Building Trust & Stickiness (Weeks 9-12)
+## Phase 3: Polish & Proactive Support (Weeks 10-12)
 
-**Goal:** Round out the MVP with features that build trust, improve the user experience, and lay the groundwork for long-term retention.
+**Goal:** Round out the MVP with features that make the product feel proactive, supportive, and ready for public launch.
 
-| Epic | User Story | Key Tasks |
+| Epic (Pain Point) | User Story | Key Tasks |
 | :--- | :--- | :--- |
-| **AI-First Support** | As a user with a question, I want to get an instant answer from an AI assistant. | - Integrate with an LLM for the in-app chat support.<br>- Build the AI assistant chat interface.<br>- Implement the escalation path to create a Zoho Desk ticket if the AI cannot resolve the issue. |
-| **Reporting & Insights** | As a user, I want to generate a professional income verification letter. | - Build the backend service to generate a PDF income letter based on the user's data.<br>- Implement the UI for the user to download their letter. |
-| **Operational Readiness** | As a developer, I want to have confidence in the stability of the platform. | - Implement the automated weekly health check (`Sunday Checkup`).<br>- Set up dashboards and alerting for key business and application metrics.<br>- Conduct a final round of E2E and security testing before the public launch. |
+| **Tax Uncertainty** | As a user, I want to be reminded before my quarterly tax payments are due. | - Integrate with an email service (Resend/Zoho Mail).<br>- Create a scheduled job that checks for upcoming tax deadlines.<br>- Build and send the tax reminder email, including the estimated amount due. |
+| **General Support** | As a user with a question, I want to get an instant answer from an AI assistant. | - Integrate with an LLM for the in-app chat support.<br>- Build the AI assistant chat interface.<br>- Implement the escalation path to create a Zoho Desk ticket. |
+| **Operational Readiness** | As a developer, I want to have confidence in the stability of the platform. | - Implement the automated weekly health check (`Sunday Checkup`).<br>- Set up dashboards and alerting for key metrics (sync failures, tax calculation errors).<br>- Conduct a final round of E2E and security testing. |

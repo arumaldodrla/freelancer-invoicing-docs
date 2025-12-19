@@ -1,62 +1,44 @@
 # Integrations
 
-**Version:** 1.1
+**Version:** 3.0
 
-This document details the integration strategy for all external services, which is a cornerstone of our ability to deliver a feature-rich product with a lean team and low operating costs.
+This document details the integration strategy for the Freelancer Financial Hub. The integrations are chosen to directly support the solutions for the five core freelancer pain points.
 
-## 1. Zoho Ecosystem: The Business Operations Backbone
+## 1. Gig Platform APIs: The Income Aggregation Engine
 
-Our integration with the Zoho suite is a core strategic advantage, estimated to **reduce development and operational overhead by 60%**. By using Zoho as the system-of-record for all business operations, we avoid building complex, non-differentiating systems for billing, CRM, and accounting.
+- **Purpose:** This is the most critical integration, directly solving the #1 pain point of income visibility. The goal is to connect to as many freelance and gig economy platforms as possible.
+- **Integration Path:**
+    - **Primary:** Direct API integrations with platforms that offer them (e.g., Upwork, Fiverr). We will build robust, resilient API clients for each.
+    - **Secondary:** For platforms without APIs, we will provide a manual CSV import and a clear manual entry form.
+- **Data Flow:** A Supabase cron job will trigger the Platform Sync Engine every 6 hours. The engine will call the respective API for each connected `income_source`, fetch new transactions, and save them to our `transactions` table.
+- **Key Challenge:** Each platform has a different API, authentication method, and rate limits. The integration clients must be built with this heterogeneity in mind.
 
-**CRITICAL PRINCIPLE:** The user-facing UI for all functions **MUST** reside within our platform. Zoho is a backend system accessed via API only. **No user will ever be redirected to a Zoho portal for any standard workflow.**
+## 2. AI Services: The Intelligence Layer
 
-### 1.1. Zoho CRM
-
-- **Purpose:** The single source of truth for the customer lifecycle.
-- **Data Exchanged:**
-    - **Outbound:** On user signup, create a new Contact in Zoho CRM.
-    - **Inbound/Outbound:** Sync subscription status (`plan`, `status`) as Tags (e.g., `Trial`, `Pro`, `Cancelled`) for segmentation.
-- **Key Workflow:** When a user upgrades from `Trial` to `Starter`, the backend must update the contact's tag in Zoho CRM from `Trial` to `Starter`.
-
-### 1.2. Zoho Billing
-
-- **Purpose:** To manage all aspects of the subscription lifecycle, from trials to renewals and cancellations.
-- **Data Exchanged:**
-    - **Outbound:** Create a new subscription when a user starts a trial. Upgrade/downgrade subscriptions when a user changes plans. Process payments via the integrated Authorize.net gateway.
-    - **Inbound:** Receive webhook notifications for billing events (e.g., `subscription_activated`, `payment_success`, `payment_failure`, `subscription_cancelled`).
-- **Key Workflow:** When a user's payment fails, a webhook from Zoho Billing triggers a backend process to update the user's subscription status to `PAST_DUE` and initiate dunning emails.
-
-### 1.3. Zoho Books
-
-- **Purpose:** To maintain accurate financial records for the business itself (not for the end-user's accounting).
-- **Data Exchanged:**
-    - **Outbound:** When a subscription payment is successfully processed by Zoho Billing, an invoice and payment record are automatically created in Zoho Books.
-- **Key Workflow:** This integration is largely automated by the Zoho ecosystem itself. Our responsibility is to ensure that the initial setup in Zoho Billing correctly links to Zoho Books.
-
-### 1.4. Zoho Desk
-
-- **Purpose:** The escalation point for the AI-first support model.
-- **Data Exchanged:**
-    - **Outbound:** When the in-app AI assistant cannot resolve an issue or the user explicitly requests human help, the backend will create a new ticket in Zoho Desk. The ticket **must** include the user's ID, email, subscription plan, and a full transcript of the AI conversation for context.
-- **Key Workflow:** The AI assistant determines that escalation is needed, calls a backend function `createSupportTicket`, which then calls the Zoho Desk API.
-
-## 2. Authorize.net: Payment Processing
-
-- **Purpose:** To securely process credit card payments.
-- **Primary Integration Path:** Via Zoho Billing's pre-built integration. This is the default and preferred method as it dramatically reduces our PCI-DSS compliance scope to SAQ-A.
-- **Data Flow:** Our frontend will use a hosted payment form (an iframe provided by Zoho/Authorize.net) to collect card details. The card data never touches our servers. A secure payment token is sent to our backend, which we then pass to Zoho Billing to associate with the subscription.
-
-## 3. AI Services: The Intelligence Layer
-
-- **Purpose:** To power the core automated features of the product.
+- **Purpose:** To power the advanced features that differentiate our product, such as receipt scanning and income forecasting.
 - **Services:**
-    - **Gemini Vision (OCR):** Used for the receipt scanning feature. The backend will send an image of a receipt to the Gemini Vision API and receive structured data (vendor, date, amount) in return.
-    - **Large Language Models (LLM):** Used for the AI support assistant and for generating financial insights. The backend will send prompts (e.g., a user's support query, a summary of a user's income data) to the LLM API and receive a natural language response.
-- **Cost Management:** API usage for AI services is a direct cost. The architecture must include monitoring and rate-limiting to manage these costs, which are projected to be $360-$1,200 in Year 1.
+    - **Gemini Vision (OCR):** Solves the expense tracking pain point by allowing users to simply photograph a receipt. The backend sends the image to the Gemini Vision API and receives structured data (vendor, date, amount) to pre-fill an expense entry.
+    - **Large Language Models (LLM):**
+        - **Income Forecasting (Post-MVP):** An LLM will be used to analyze a user's historical income data (as a time-series) and provide a predictive forecast.
+        - **AI Support:** An LLM will power the in-app support assistant.
 
-## 4. Data Consistency & Error Handling
+## 3. Zoho Ecosystem: The Business Operations Backbone
 
-- **Idempotency:** All API calls that create or modify data in external systems (especially Zoho Billing and Books) **must** be idempotent. Use unique transaction IDs or other mechanisms to prevent duplicate records.
-- **Retry Logic:** Implement an exponential backoff retry strategy for all critical API calls to external systems to handle transient network failures.
-- **Circuit Breaker:** For high-volume integrations like income source syncing, implement a circuit breaker pattern to prevent cascading failures if a third-party API is down.
-- **Dead-Letter Queue:** For critical webhook events from Zoho, use a dead-letter queue to store any events that fail to be processed after multiple retries. This allows for manual inspection and reprocessing, ensuring no revenue-critical events are lost.
+- **Purpose:** To manage our business operations (subscriptions, CRM, accounting) so we can focus on building the core product.
+- **Integrations:**
+    - **Zoho Billing & Authorize.net:** To manage the application's own subscription lifecycle. The user's payment for our service is handled here.
+    - **Zoho CRM:** To manage our customer relationships and segment users based on their subscription plan.
+    - **Zoho Books:** To sync our application's revenue and user data for our own internal accounting. **Crucially, we also use the Zoho Books API to add credibility to the user's generated income verification letters.** When a user requests a letter, we can optionally sync their verified income data from our platform to their own connected Zoho Books account, and then pull it back for the letter, adding a layer of third-party verification.
+    - **Zoho Desk:** As the escalation point for the AI support assistant.
+
+## 4. PDF Generation Service
+
+- **Purpose:** To solve the "prove my income" pain point by generating professional income verification letters.
+- **Integration Path:** The backend will call a dedicated PDF generation service (or a library like `fpdf2` running in a Supabase Function). It will send the user's aggregated income data, and the service will return a formatted, professional-looking PDF.
+
+## 5. Email Service (Resend / Zoho Mail)
+
+- **Purpose:** To provide proactive communication and reminders, a key part of the tax and budgeting solutions.
+- **Services:**
+    - **Tax Reminders:** Send automated emails 30 days before quarterly tax deadlines with the estimated amount due.
+    - **Weekly Summaries:** Send a weekly email digest of income earned, progress toward goals, and the updated tax estimate.

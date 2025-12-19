@@ -1,114 +1,110 @@
 # Architecture
 
-**Version:** 1.1
+**Version:** 3.0
 
-This document outlines the architecture of the Gig/Freelance Income Reset application, aligning the technical strategy with the business goals of rapid, scalable, and cost-effective market entry.
+This document outlines the architecture for the Freelancer Financial Hub. The design is optimized to solve the five core pain points of freelancers by leveraging a modern, scalable, and AI-augmented tech stack.
 
-## 1. Architectural Principles & Business Alignment
+## 1. Architectural Principles
 
-- **Speed to Market:** The architecture leverages a pre-integrated, serverless stack (Vercel, Supabase, Zoho) to enable a 12-week MVP launch and capture the first-mover advantage in the gig-economy niche.
-- **Low Operating Costs:** The choice of serverless components and a lean 3-developer team, augmented by AI, keeps initial infrastructure costs to an estimated ~$5,000 in Year 1, supporting an aggressive, organic-first GTM strategy.
-- **Scalability & Reliability:** The architecture is designed to scale from an initial 500 beta users to 100K+ active users in Year 2 without significant re-engineering, supporting the projected rapid growth.
-- **Security & Compliance by Design:** The architecture incorporates security and compliance from the ground up, a key differentiator and trust-builder in a market where users are sensitive about their financial data.
+- **Pain-Point Driven:** Every component of the architecture maps directly to solving a specific, high-severity freelancer pain point (income visibility, tax uncertainty, etc.).
+- **Data-First:** The core of the product is a unified financial data model. The architecture prioritizes the accurate and secure aggregation, storage, and analysis of user income and expense data.
+- **AI-Augmented:** The architecture is designed to integrate AI services (for OCR, forecasting, and development acceleration) as a core competency, not an afterthought.
+- **Lean & Scalable:** The serverless stack (Vercel, Supabase) is chosen to minimize operational overhead and scale seamlessly from the first user to hundreds of thousands, aligning with the product-led growth model.
 
 ## 2. System Context Diagram
 
-This diagram shows the overall system landscape and how the application interacts with external systems and users.
+This diagram shows the high-level system landscape, focusing on the key data flows that solve the core user problems.
 
 ```mermaid
 graph TD
-    subgraph "Gig/Freelance Income Reset Platform"
-        A[Frontend (Vercel)] --> B{Backend (Supabase)};
+    subgraph "Freelancer Financial Hub"
+        A[Frontend (Vercel/React)] --> B{Backend (Supabase)};
     end
 
-    subgraph "Users"
-        C[Freelancer/Gig Worker] --> A;
+    subgraph "User & External Platforms"
+        C[Freelancer] --> A;
+        D[Gig Platforms (Upwork, Fiverr, etc.)] <-.-> B;
     end
 
-    subgraph "External Services & Integrations"
-        B --> D[Zoho CRM (Contacts)];
-        B --> E[Zoho Billing (Subscriptions)];
-        B --> F[Zoho Books (Accounting)];
-        B --> G[Zoho Desk (Support Tickets)];
-        B --> H[Authorize.net (Payments)];
-        B --> I[Gig Platforms (Fiverr, Upwork, etc.)];
-        B --> J[AI - Gemini Vision (OCR)];
-        B --> K[AI - LLM (Support & Insights)];
-        B --> L[Email (Resend/Zoho Mail)];
+    subgraph "Backend Services & Integrations"
+        B --> E[Zoho CRM/Billing (Subscriptions)];
+        B --> F[Zoho Books (Accounting Sync)];
+        B --> G[AI - Gemini Vision (Receipt OCR)];
+        B --> H[AI - LLM (Forecasting & Support)];
+        B --> I[Email Service (Resend/Zoho Mail)];
+        B --> J[PDF Generation Service];
     end
 ```
 
 ## 3. Component Diagram
 
-This diagram breaks down the system into its core components and their relationships.
+This diagram details the internal components, highlighting the data aggregation and analysis engines.
 
 ```mermaid
 graph TD
     subgraph "Frontend (Vercel)"
-        A[React App - Refine/Tailwind] --> B(Supabase Auth);
+        A[React App - Refine/Recharts] --> B(Supabase Auth);
         A --> C{Backend API - Supabase Edge Functions};
     end
 
     subgraph "Backend (Supabase)"
         C --> D[PostgreSQL Database (RLS Enforced)];
-        C --> E[Supabase Storage (Receipts)];
-        F[Supabase Cron (Scheduled Jobs)] --> C;
+        D -- contains --> T[Transactions];
+        D -- contains --> E[Expenses];
+        F[Supabase Cron (Sync Jobs)] --> G[Platform Sync Engine];
+        G --> C;
+        H[Tax Calculation Engine] --> C;
     end
 
     subgraph "Integrations Layer"
-        C --> G[Zoho Services API Client];
-        C --> H[Authorize.net API Client];
-        C --> I[Gig Platform API Clients];
-        C --> J[AI Services API Client];
+        G --> I[Gig Platform API Clients];
+        C --> J[Zoho API Client];
+        C --> K[AI Services API Client];
+        C --> L[PDF & Email Clients];
     end
 ```
 
 ## 4. Data Flow Diagrams
 
-These diagrams illustrate the sequence of operations for key user flows, designed to be 100% automated.
+### a) Real-Time Income Aggregation & Tax Calculation
 
-### a) New User Signup & Freemium Trial Activation
+```mermaid
+sequenceDiagram
+    participant CronJob as Supabase Cron (every 6 hrs)
+    participant SyncEngine as Platform Sync Engine
+    participant GigPlatform as Upwork/Fiverr API
+    participant Backend
+    participant Frontend
+
+    CronJob->>SyncEngine: Trigger sync for all users
+    SyncEngine->>GigPlatform: Fetch new transactions for user
+    GigPlatform-->>SyncEngine: Return new income data
+    SyncEngine->>Backend: Save new transactions to DB
+    Backend->>Backend: Trigger Tax Calculation Engine
+    Backend->>Frontend: Push real-time update via Supabase Realtime
+    Frontend->>Frontend: Update Dashboard charts (YTD Income, Tax Estimate)
+```
+
+### b) On-Demand Income Verification Letter
 
 ```mermaid
 sequenceDiagram
     participant User
     participant Frontend
     participant Backend
-    participant ZohoCRM
-    participant ZohoBilling
+    participant PDFService as PDF Generation Service
 
-    User->>Frontend: Enters email/password for 15-day free trial
-    Frontend->>Backend: Calls signup endpoint
-    Backend->>Backend: Creates user in Supabase Auth
-    Backend->>ZohoCRM: Creates/tags contact as 'Trial'
-    Backend->>ZohoBilling: Creates trial subscription
-    Backend-->>Frontend: Returns success, user is logged in
-    Frontend-->>User: Navigates to onboarding wizard
+    User->>Frontend: Clicks "Download Income Letter"
+    Frontend->>Backend: Requests income verification PDF
+    Backend->>Backend: Query all historical income data for user
+    Backend->>PDFService: Send formatted data and request PDF generation
+    PDFService-->>Backend: Return generated PDF file
+    Backend-->>Frontend: Stream PDF file for download
+    Frontend-->>User: Browser prompts to save PDF
 ```
 
-### b) Upgrading to a Paid Plan
+## 5. Key Design Decisions
 
-```mermaid
-sequenceDiagram
-    participant User
-    participant Frontend
-    participant Backend
-    participant AuthorizeNet
-    participant ZohoBilling
-
-    User->>Frontend: Selects 'Pro' plan and clicks 'Upgrade'
-    Frontend->>AuthorizeNet: Renders hosted payment form
-    User->>AuthorizeNet: Submits credit card details
-    AuthorizeNet->>Backend: Securely sends payment token
-    Backend->>ZohoBilling: Updates payment method with token
-    Backend->>ZohoBilling: Converts trial to active 'Pro' subscription
-    Backend->>ZohoCRM: Updates contact tag to 'Pro'
-    Backend-->>Frontend: Returns success
-    Frontend-->>User: Unlocks Pro features
-```
-
-## 5. Key Design Decisions & Trade-offs
-
-- **Zoho as the Business Backend:** This is a critical strategic decision. It offloads the immense complexity of billing, subscription management, and accounting, reducing our development scope by an estimated 60%. The trade-off is a dependency on the Zoho ecosystem, which is mitigated by abstracting all interactions behind our own API, preventing vendor lock-in at the UI level.
-- **Product-Led Growth Architecture:** The entire architecture is optimized for a self-service, freemium model. This minimizes the need for a sales team and reduces CAC to an industry-leading $10, a key driver of the projected 17x LTV:CAC ratio.
-- **AI-Augmented Development:** The use of Google Antigravity is a core part of the operational plan, enabling a lean 3-person team to achieve the productivity of a much larger one. This is a competitive advantage that allows for faster iteration and lower burn rate.
+- **Supabase as the Core:** Supabase is used for its integrated database, authentication, edge functions, and real-time capabilities. This simplifies the stack and allows the team to focus on application logic rather than infrastructure management.
+- **API-Driven Income Sync:** The primary method for income aggregation is via direct API integrations with gig platforms. This provides the most accurate and real-time data, directly addressing the core pain point of income visibility.
+- **Decoupled Engines:** Key logic for platform syncing and tax calculation is encapsulated in dedicated "engines." This makes the system more modular, easier to test, and allows for future expansion (e.g., adding new platforms or supporting different tax jurisdictions).

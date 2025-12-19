@@ -1,75 +1,53 @@
-# Product Requirements Document (PRD): Freelancer Invoicing & Gig Income Tracking
+_# Product Requirements Document (PRD): The Freelancer Financial Hub
 
-## 1. Vision
+**Version:** 3.0
 
-To empower freelancers with a simple, automated, and trustworthy platform to manage their income, track expenses, and understand their tax obligations, giving them financial clarity and peace of mind.
+## 1. Vision & Mission
 
-## 2. Target Users & Jobs to Be Done (JTBD)
+- **Vision:** To be the indispensable financial command center for freelancers and gig economy workers, providing absolute clarity on their income, taxes, and financial health.
+- **Mission:** To eliminate financial uncertainty for freelancers by automating income aggregation, simplifying tax management, and providing the tools needed to prove income and plan for the future.
 
-- **Target Users:** Independent contractors, gig economy workers (e.g., DoorDash drivers, Upwork freelancers), and self-employed professionals.
-- **Jobs to Be Done:**
-    - **As a freelancer, I want to...**
-        - ...easily track my income from multiple sources in one place.
-        - ...get a clear estimate of my quarterly and annual tax obligations.
-        - ...track my business expenses to maximize deductions.
-        - ...generate professional invoices and get paid on time.
-        - ...have a clear overview of my financial health.
+## 2. Target Audience & Quantified Pain Points
+
+- **Target Audience:** Independent contractors, gig economy workers (e.g., DoorDash, Upwork, Fiverr), and self-employed professionals who lack the tools of traditional employment.
+
+- **Core Pain Points & Solutions:**
+
+| Pain Point (Severity) | Job-to-Be-Done (JTBD) | Core Feature Solution |
+| :--- | :--- | :--- |
+| **"I don't know my real income"** (10/10) | "When I work multiple gigs, I want to **see all my income in one place, in real-time**, so I can understand my true earnings." | **Real-Time Income Aggregation Dashboard** |
+| **"How much tax do I owe?"** (9/10) | "When I earn self-employment income, I want to **know my exact tax liability at all times**, so I can avoid penalties." | **Intelligent Tax Calculation Engine** |
+| **"I can't prove my income"** (9/10) | "When I need a loan or apartment, I want to **instantly generate a professional income verification document**, so I can prove my financial stability." | **Automated Income Verification Letter Generator** |
+| **"I'm losing deductions"** (8/10) | "When I have business expenses, I want to **easily track them and maximize my deductions**, so I can lower my tax bill." | **Multi-Method Expense Tracking (with OCR)** |
+| **"My income is unpredictable"** (7/10) | "When my income fluctuates, I want to **get a forecast of my future earnings**, so I can budget with confidence." | **AI-Powered Income Forecasting** |
 
 ## 3. Core Features
 
-- **Automated Income Aggregation:** Connect to popular freelance platforms (Fiverr, Upwork, DoorDash) to automatically sync income data.
-- **Expense Tracking with OCR:** Manually enter expenses or scan receipts using the app's camera to automatically extract details.
-- **Tax Estimation:** Real-time estimation of self-employment taxes based on income and expenses.
-- **Invoicing:** Create and send professional invoices to clients.
-- **Dashboard & Reporting:** A comprehensive dashboard with visualizations of income, expenses, and tax estimates.
+- **Automated Income Aggregation:** Connect to popular freelance platforms (Fiverr, Upwork, DoorDash) to automatically sync income data. Provides a unified dashboard with YTD totals and trends.
+- **Real-Time Tax Engine:** Automatically calculates self-employment tax liability based on aggregated income and tracked expenses. Displays quarterly estimates and sends deadline reminders.
+- **PDF Income Verification:** One-click generation of a professional, notarized-style income verification letter, suitable for loan and housing applications.
+- **Expense Tracking with AI:** Manual expense entry and AI-powered receipt scanning (OCR) to capture every possible deduction.
+- **Predictive Income Forecasting:** (Post-MVP) AI-driven analysis of historical data to provide monthly income forecasts and stability metrics.
+- **Insightful Dashboards & Reports:** Rich visualizations for income trends, expense breakdowns, tax liabilities, and income source comparisons.
 
-### Out of Scope for v1.0
+### Out of Scope
 
-- Time tracking
-- Project management features
-- Multi-user collaboration
-- Direct bank account integration for expense tracking (will be considered for a future release)
+- **Sending Invoices/Managing Payables:** The focus is on income and expense management for freelancers, not on accounts receivable/payable for general businesses.
+- **Direct Bank Account Integration:** All income is tracked via platform APIs or manual entry, not direct bank feeds.
 
 ## 4. User Stories
 
-- **As a new user, I want to...**
-    - ...sign up for a free trial with just my email and a password.
-    - ...be guided through a simple onboarding process to connect my income sources.
-    - ...understand the app's privacy and security features from the beginning.
-- **As an active user, I want to...**
-    - ...see all my income streams in one dashboard.
-    - ...get reminders for upcoming tax deadlines.
-    - ...easily categorize my expenses for tax purposes.
-    - ...upgrade my subscription plan seamlessly within the app.
+- **As a new freelancer, I want to...**
+    - ...connect my Upwork and DoorDash accounts in under 5 minutes.
+    - ...see my combined year-to-date income on a single dashboard.
+    - ...get an immediate estimate of how much I should be setting aside for taxes.
+- **As an established freelancer, I want to...**
+    - ...download a professional PDF of my last 12 months of income to apply for a mortgage.
+    - ...scan a photo of my lunch receipt and have it automatically categorized as a business meal.
+    - ...receive an email reminder 30 days before my quarterly tax payment is due, telling me the exact amount to pay.
 
-## 5. AI-First Customer Lifecycle Requirements
+## 5. Non-Functional Requirements
 
-- **AI Support as Default:** The primary support channel will be an in-app AI assistant. Human support is an escalation path, not the default.
-- **Automated Customer Journey:** The entire customer lifecycle, from trial to paid subscription and support, is designed to be self-service and automated.
-- **No Zoho Portals for Customers:** All customer-facing interactions, including subscription management and billing, will be handled within the application's UI. Zoho will be used as a backend system of record only.
-
-## 6. Non-Functional Requirements
-
-- **Performance:**
-    - Page load time < 2.5s
-    - API response time < 500ms for typical reads
-- **Availability:** 99.5% uptime
-- **Security:** Compliance with GDPR, CCPA-like principles, ISO 27001, SOC 2, and PCI-DSS (SAQ-A).
-- **Scalability:** The architecture must be able to scale to support a growing user base.
-
-## 7. Analytics & Events (Privacy-Respecting)
-
-- **Events to Track:**
-    - User sign-ups and onboarding completion
-    - Income source connections (successful and failed)
-    - Subscription upgrades and cancellations
-    - Feature usage (e.g., receipt scans, invoices created)
-- **Privacy:** All analytics will be collected with user consent and will not include any personally identifiable information (PII).
-
-## 8. Risks & Mitigations
-
-| Risk | Mitigation |
-| --- | --- |
-| **Data Security Breach** | Implement robust security measures, including encryption, access controls, and regular security audits. |
-| **Inaccurate Tax Estimates** | Clearly communicate that the tax estimates are for informational purposes only and not financial advice. |
-| **Third-Party API Downtime** | Implement resilient error handling and retry mechanisms for all third-party API integrations. |
+- **Data Accuracy:** The income aggregation and tax calculation must be extremely accurate. Data integrity is paramount.
+- **Security:** Handling highly sensitive financial data requires bank-level security, including end-to-end encryption and strict access controls.
+- **Performance:** The dashboard must load quickly, and sync jobs must be efficient to provide a near real-time view of a user's financial status.

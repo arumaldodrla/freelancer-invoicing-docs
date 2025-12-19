@@ -1,45 +1,41 @@
 # Security & Compliance
 
-**Version:** 1.1
+**Version:** 3.0
 
-This document outlines the security posture, threat model, and compliance strategy for the Gig/Freelance Income Reset application. Security is not just a feature but a core pillar of our brand promise to build trust with users handling their sensitive financial data.
+This document outlines the security and compliance strategy for the Freelancer Financial Hub. Handling a user's complete income and expense history is a profound responsibility; therefore, security is our single most important product feature.
 
-## 1. Security Principles & Business Alignment
+## 1. Security as a Core Tenet
 
-- **Trust as a Differentiator:** In a market where users are entrusting us with their financial livelihood, a robust and transparent security posture is a key competitive advantage against less focused incumbents like spreadsheets.
-- **Compliance as a Market Enabler:** Adhering to standards like GDPR and CCPA is not just a legal requirement but a business enabler that unlocks access to key markets like the EU and California.
-- **Cost-Effective Security:** The security strategy is designed to be both robust and cost-effective, leveraging the built-in security features of our chosen stack (Supabase, Vercel, Zoho) to minimize bespoke security engineering.
+Our entire brand is built on trust. A security breach would not just be a technical failure; it would be an existential threat to the business. Our security posture must be robust, transparent, and consistently communicated to the user.
 
 ## 2. Compliance Strategy
 
-Our compliance strategy is to meet or exceed industry best practices for a SaaS company of our size and to be "audit-ready" for the following frameworks:
+Our compliance roadmap is designed to build trust and enable market access.
 
-| Framework | Status | Key Controls & Rationale |
+| Framework | Status | Rationale & Key Controls |
 | :--- | :--- | :--- |
-| **GDPR / CCPA** | **Required at Launch** | Data processing consent, data subject rights (DSAR) automation, and DPIA are mandatory for our target markets. See `PRIVACY_GDPR_DPIA.md`. |
-| **PCI-DSS** | **Required at Launch** | Scope is minimized to **SAQ-A** by using Authorize.net and Zoho Billing's hosted payment forms. **No cardholder data will ever touch our servers.** |
-| **SOC 2 (Type II)** | **Target: Year 2** | We will design our controls to be SOC 2-compliant from day one, focusing on the Trust Services Criteria of Security, Availability, and Confidentiality. This will be a key enterprise selling point. |
-| **ISO 27001** | **Target: Year 2-3** | The principles of ISO 27001 will inform our Information Security Management System (ISMS), but formal certification is a longer-term goal. |
+| **GDPR / CCPA** | **Required at Launch** | As we are handling sensitive financial PII, strict adherence to data subject rights (access, erasure) is mandatory. All data processing will be done with explicit user consent. |
+| **PCI-DSS** | **Required at Launch** | Our PCI scope is minimized to **SAQ-A** because we use Zoho Billing and Authorize.net's hosted forms for our own subscription payments. We **never** touch user credit card data. |
+| **SOC 2 (Type II)** | **Target: Year 2** | Achieving SOC 2 compliance is a key goal to build enterprise-level trust and will be a major marketing point. Our controls are designed with SOC 2 criteria (Security, Availability, Confidentiality) in mind from day one. |
 
 ## 3. Threat Model (STRIDE)
 
-This STRIDE model identifies potential threats and our planned mitigations.
+This STRIDE model is updated to reflect the new focus on aggregated financial data.
 
 | Threat Category | Scenario | Mitigation |
 | :--- | :--- | :--- |
-| **Spoofing** | An attacker impersonates a user to gain access to their financial data. | - **Mitigation:** Enforce strong password policies and multi-factor authentication (MFA) via Supabase Auth. Secure credential storage is handled by Supabase. |
-| **Tampering** | An attacker intercepts and modifies a user's income or expense data in transit. | - **Mitigation:** Enforce TLS 1.2+ for all data in transit. Use digital signatures for critical webhook events to ensure integrity. |
-| **Repudiation** | A user denies having authorized a subscription upgrade. | - **Mitigation:** Log all significant user actions (e.g., clicking "Upgrade," IP address, user agent) in the `audit_log` table. The source of truth for the financial transaction is Zoho Billing. |
-| **Information Disclosure** | A vulnerability in the application exposes the financial data of all users. | - **Mitigation:** Implement strict Row-Level Security (RLS) in the database to ensure data isolation. Conduct regular vulnerability scanning and penetration testing. Encrypt sensitive data at rest (e.g., API keys for income sources). |
-| **Denial of Service (DoS)** | An attacker floods the application with traffic, making it unavailable for legitimate users. | - **Mitigation:** Leverage Vercel's and Supabase's built-in DDoS protection. Implement rate limiting on all public-facing API endpoints. |
-| **Elevation of Privilege** | A regular user finds a way to gain administrative access to the system. | - **Mitigation:** No traditional admin roles. All "admin" functions are handled via secure, audited access to the Supabase and Zoho dashboards. RLS prevents a user from accessing any data other than their own. |
+| **Spoofing** | An attacker impersonates a user to gain access to their complete financial history and tax information. | - **Mitigation:** Enforce Multi-Factor Authentication (MFA). Use Supabase's secure authentication mechanisms. |
+| **Tampering** | An attacker intercepts and modifies a user's income or expense data, leading to incorrect tax calculations and financial decisions. | - **Mitigation:** Enforce TLS 1.2+ for all data in transit. Use checksums and validation on all data synced from external platforms. |
+| **Repudiation** | A user denies having manually entered a large expense to fraudulently lower their tax bill. | - **Mitigation:** Maintain a detailed, immutable `audit_log` for every transaction, including manual entries, with timestamps and IP addresses. |
+| **Information Disclosure** | **(The Highest Risk)** A vulnerability exposes the financial data of all users. | - **Mitigation:** Strict Row-Level Security (RLS) in the database is the primary control, ensuring users can **only** access their own data. All sensitive data (like API keys for income sources) will be encrypted at rest in the database. Regular vulnerability scanning and third-party penetration testing are mandatory. |
+| **Denial of Service (DoS)** | An attacker floods the income sync service, running up costs and making the platform unavailable. | - **Mitigation:** Leverage Vercel's and Supabase's built-in DDoS protection. Implement strict rate limiting on all API endpoints and sync jobs. |
+| **Elevation of Privilege** | A regular user finds a way to gain administrative access to the system or view another user's data. | - **Mitigation:** The principle of least privilege is enforced everywhere. There are no traditional "admin" roles in the application itself. RLS is the ultimate backstop against this threat. |
 
-## 4. Security Controls
+## 4. Key Security Controls
 
 - **Authentication:** Handled by Supabase Auth, with MFA enforced.
-- **Authorization:** Enforced at the database level via Row-Level Security (RLS).
+- **Authorization:** Enforced at the database level via Row-Level Security (RLS). This is our most critical security control.
 - **Data Encryption:**
-    - **At Rest:** Handled by Supabase's default encryption for the database and storage.
-    - **In Transit:** TLS 1.2+ enforced for all communication.
-- **Secrets Management:** All API keys and secrets will be stored in the environment variables of our hosting providers (Vercel, Supabase), not in the codebase.
-- **Vulnerability Management:** We will use automated dependency scanning (e.g., GitHub Dependabot) and conduct regular third-party penetration tests post-launch.
+    - **At Rest:** All data in the Supabase database is encrypted by default. Additionally, sensitive fields like `api_key_encrypted` in the `income_sources` table will have application-level encryption.
+    - **In Transit:** TLS 1.2+ is enforced for all communication.
+- **Secrets Management:** All secrets (API keys, database URLs) are stored in Vercel and Supabase environment variables, never in code.
